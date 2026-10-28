@@ -216,10 +216,12 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final Map<String, String> appLabels, appBanners;
     /** Every app tile is its icon on a card tinted from that icon, never its banner (config.xml, uniform_tiles). */
     private final boolean uniformTiles;
+    private final boolean sharingan;
     private final List<Entry> items = new ArrayList<>();
 
     AppAdapter(Context ctx, TileListener listener, int dockSize, Config cfg) {
         this.ctx = ctx;
+        this.sharingan = SharinganView.enabled(ctx);
         this.listener = listener;
         this.dockSize = dockSize;
         this.favourites = cfg.dockApps;
@@ -236,7 +238,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.dockTitle = cfg.dockTitle;
         this.dockRow = cfg.dockRow;
         this.singleRow = cfg.singleRow;
-        this.restNameAlpha = cfg.alwaysShowNames ? 0.75f : 0f;
+        this.restNameAlpha = sharingan ? 0f : cfg.alwaysShowNames ? 0.75f : 0f;
         this.cinematic = cfg.cinematicHome;
         this.launchActions = cfg.launchActions;
         this.tileMenu = cfg.tileMenu;
@@ -300,6 +302,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // The icon is only drawn (and sampled for the glow) when there is no banner, so a tile with a
             // banner skips loading and decoding it.
             Drawable icon = banner == null ? ri.loadIcon(pm) : null;
+            if (sharingan) {
+                int logo = pkg.equals("com.stremio.one") ? R.drawable.sharingan_stremio : pkg.equals("org.smarttube.stable") ? R.drawable.sharingan_smarttube : pkg.equals("com.apple.atve.androidtv.appletv") ? R.drawable.sharingan_apple : pkg.equals("org.jellyfin.androidtv") ? R.drawable.sharingan_jellyfin : 0;
+                if (logo != 0) { banner = null; icon = ctx.getDrawable(logo); }
+            }
             if (card != null) {
                 fresh.add(new Entry(Entry.CARD, label, component, banner, icon, card.caption, card.accent));
             } else {
@@ -436,6 +442,11 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             View label = v.findViewById(R.id.label);
             label.setPadding(label.getPaddingLeft(), label.getPaddingTop(), label.getPaddingRight(), Math.round(4f * density));
         }
+        if (sharingan) {
+            FrameLayout.LayoutParams iconLp = (FrameLayout.LayoutParams) v.findViewById(R.id.icon).getLayoutParams();
+            iconLp.width = iconLp.height = Math.round(64*density); iconLp.bottomMargin = 0;
+            v.findViewById(R.id.icon).setLayoutParams(iconLp);
+        }
         return new Holder(v, listener, animations, advancedEffects, reducedMotion, restNameAlpha, focusOvershoot);
     }
 
@@ -489,6 +500,11 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             h.icon.setVisibility(View.VISIBLE);
             h.label.setText(e.label);
             h.label.setVisibility(uniformTiles ? View.GONE : View.VISIBLE);
+        }
+        if (sharingan) {
+            h.card.setBackground(null); h.label.setVisibility(View.GONE);
+            h.name.setVisibility(View.VISIBLE);
+            h.name.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {

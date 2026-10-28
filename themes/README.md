@@ -19,6 +19,7 @@ refused (copy a theme first), and a `config.json` it cannot read is named before
 
 | Theme | What it does | Screenshot |
 |---|---|---|
+| `itachi/` | This fork: animated Sharingan gaze, soft moving focus glow, white favorite-app logos and four-column rows. Requires this fork’s launcher; see [setup](itachi/README.md). | <img src="itachi/screenshot.jpg" width="320" alt="Itachi theme"> |
 | `default/` | The built-in look written out as JSON, as a starting point for your own | <img src="default/screenshot.jpg" width="320" alt="default theme"> |
 | `aurora/` | A dark aurora wallpaper (teal and violet on navy, darker at the bottom) with a matching background colour | <img src="aurora/screenshot.jpg" width="320" alt="aurora theme"> |
 | `dussehra/` | Festive skin for Dussehra (ends 21 Oct 2026): a marigold toran, a faint gold rangoli, a diya for Wi-Fi, a bell for Inputs, a marigold for Settings and a petal shower | <img src="dussehra/screenshot.jpg" width="320" alt="dussehra theme"> |
@@ -43,6 +44,7 @@ A new key needs one there in the same pull request.
 
 | Key | Type | Meaning |
 |---|---|---|
+| `sharingan` | bool, this fork only | Enable the Itachi animation and styling. Requires the bundled Itachi wallpaper; off by default. |
 | `dock_apps` | list of package names | The dock row, in order; missing apps are skipped |
 | `fill_dock` | bool | Fill the dock slots `dock_apps` leaves free with the first grid apps (true by default); false leaves them empty |
 | `hidden_apps` | list of package names | Never shown as tiles |

@@ -435,6 +435,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         sky = findViewById(R.id.sky);
         sky.setIntensity(cfg.skyIntensity);
         glass = findViewById(R.id.glass);
+        if (SharinganView.enabled(this)) glass.setVisibility(View.GONE);
         glass.setStyle(cfg.glassStyle);
         if (festive) glass.setAccent(festival.accentColor());
         ambient = findViewById(R.id.ambient);
@@ -770,6 +771,19 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             makeIconOnly((TextView) btnSettings);
         }
         if (cfg.iconOnlyInputs) makeIconOnly((TextView) btnInputs);
+        if (SharinganView.enabled(this)) {
+            for (TextView pill : new TextView[]{(TextView)btnInputs, btnWifi, (TextView)btnLibraryTop, (TextView)btnSettings}) {
+                for (Drawable d : pill.getCompoundDrawablesRelative()) if (d != null) d.setBounds(0,0,Math.round(30*density),Math.round(30*density));
+                pill.setCompoundDrawablesRelative(pill.getCompoundDrawablesRelative()[0], null, null, null);
+                pill.getLayoutParams().width = Math.round(52*density);
+                pill.getLayoutParams().height = Math.round(48*density);
+                pill.setBackground(null);
+                pill.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
+                pill.setElevation(0);
+            }
+            TextView dateText = findViewById(R.id.date); dateText.setAllCaps(false); dateText.setLetterSpacing(.02f);
+            dateText.setTypeface(android.graphics.Typeface.create("sans-serif-light",android.graphics.Typeface.NORMAL));
+        }
         btnSettings.setOnLongClickListener(v -> {
             showSettingsMenu();
             return true;
@@ -809,6 +823,21 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         }
         if (festive) applyFestiveSkin((TextView) btnInputs, (TextView) btnSettings);
+
+        if (SharinganView.enabled(this)) {
+            for (View button : new View[]{btnInputs, btnWifi, btnSettings}) {
+                button.setAlpha(button.isFocused() ? 1f : .65f);
+                button.setScaleX(button.isFocused() ? 1.20f : 1f);
+                button.setScaleY(button.isFocused() ? 1.20f : 1f);
+                button.setOnFocusChangeListener((view, focused) -> {
+                    view.animate().cancel();
+                    view.animate().scaleX(focused ? 1.20f : 1f)
+                            .scaleY(focused ? 1.20f : 1f).alpha(focused ? 1f : .65f)
+                            .setDuration(!animations ? 0 : reducedMotion ? Motion.REDUCED_MS : 180)
+                            .start();
+                });
+            }
+        }
 
         // Hide the glass when focus leaves the tiles.
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalFocusChangeListener((oldF, newF) -> {
@@ -1585,7 +1614,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public void onBackPressed() {
-        // Home screen: Back goes nowhere.
+        // Optional Itachi-theme shortcut; keep ordinary Home behavior without Aerial Views.
+        if (SharinganView.enabled(this)) {
+            Intent screensaver = new Intent(Intent.ACTION_MAIN).setClassName("com.neilturner.aerialviews",
+                    "com.neilturner.aerialviews.ui.screensaver.TestActivity");
+            if (getPackageManager().resolveActivity(screensaver, 0) != null) open(screensaver);
+        }
     }
 
     // ---- glass highlight -------------------------------------------------------------------------
